@@ -1,0 +1,4 @@
+api:
+  advertiseAddress: 10.129.84.11
+kubernetesVersion: 1.9.0
+imageRepository: xiejieyi
