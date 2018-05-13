@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<body>
+<div id="app">
+
+    <el-upload
+            class="upload-demo"
+            drag
+            action="/calcWordFrequency"
+            :on-success="handleSuccess"
+            multiple>
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+        <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+    </el-upload>
+
+    <template>
+        <el-table
+                :data="tableData"
+                style="width: 100%">
+            <el-table-column
+                    prop="word"
+                    label="单词"
+                    width="180">
+            </el-table-column>
+            <el-table-column
+                    prop="frequency"
+                    label="出现频率"
+                    width="180">
+            </el-table-column>
+        </el-table>
+    </template>
+</div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                visible: false,
+                tableData: [{
+                    word: '2016-05-02',
+                    label: '王小虎'
+                }]
+            }
+        },
+        methods: {
+            handleSuccess(response, file, fileList) {
+                console.log(response);
+                for(var item in response){
+                    console.log(item)
+
+                }
+            }
+        }
+    });
+
+</script>
+</html>
