@@ -1,6 +1,7 @@
 package com.xiejieyi.poidemo;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 类描述：
@@ -9,16 +10,14 @@ import java.util.*;
  */
 public class Dictionary
 {
-    private HashMap<String, Integer> dictionary;
-    private int wordsCount;
+    private static HashMap<String, Integer> dictionary = new HashMap<>();
+    private static int wordsCount = 0;
 
     /**
      * 字典这个类的构造函数
      */
-    public Dictionary()
-    {
-        dictionary = new HashMap<>();
-        wordsCount = 0;
+    public Dictionary()    {
+
     }
 
     /**
@@ -26,7 +25,7 @@ public class Dictionary
      *
      * @param word
      */
-    public void insert(String word)
+    public static void insert(String word)
     {
         if (dictionary.containsKey(word))
         {
@@ -40,29 +39,9 @@ public class Dictionary
     }
 
     /**
-     * 取得字典里所有不同的单词
-     *
-     * @return
-     */
-    public int getDifferentWordsNum()
-    {
-        return dictionary.size();
-    }
-
-    /**
-     * 返回字典里的所有单词 * 其出现次数
-     *
-     * @return
-     */
-    public int getAllWordsNum()
-    {
-        return wordsCount;
-    }
-
-    /**
      * 展示字典中存放的所有单词及其出现次数
      */
-    public List getDictionary()
+    public static List getDictionary()
     {
         // for (Iterator<String> it = dictionary.keySet().iterator(); it.hasNext(); )
         // {
@@ -71,17 +50,16 @@ public class Dictionary
         //     System.out.print(": ");
         //     System.out.println(dictionary.get(key));
         // }
-
-
         List<Map.Entry<String, Integer>> list = new ArrayList<>(dictionary.entrySet());
 
         //升序排序
         Collections.sort(list, (o1, o2) -> o2.getValue().compareTo(o1.getValue()));
 
         // for (Map.Entry<String, Integer> e: list) {
-        //     System.out.println(e.getKey()+":"+e.getValue());
-        // }
-        return list;
+        //     System.out.println(e.getKey()+":"+e.getValue());        // }
+
+        return list.stream().filter(item->item.getValue()>5).collect(Collectors.toList());
+        // return list.stream().filter(item->item.getValue()>5 && item.getValue()<30).collect(Collectors.toList());
     }
     // public static void main( String[] args ) throws Exception {
     //     //这里放置你所说的段落

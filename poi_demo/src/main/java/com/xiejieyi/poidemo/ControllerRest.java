@@ -48,7 +48,7 @@ public class ControllerRest
         try
         {
             List<File> fileList = getFileList(filePath);
-            Dictionary dict = new Dictionary();
+            // Dictionary dict = new Dictionary();
             for (File item : fileList)
             {
                 XWPFDocument docx = new XWPFDocument(
@@ -68,14 +68,14 @@ public class ControllerRest
                     String[] words = line.split("\\W");
                     for (String word : words)
                     {
-                        if (word.length() != 0)
+                        if (word.length() != 0 && word.matches("[a-zA-Z]+"))
                         {
-                            dict.insert(word);
+                            Dictionary.insert(word.toLowerCase());
                         }
                     }
                 }
             }
-            return dict.getDictionary();
+            return Dictionary.getDictionary();
 
 
         } catch (IOException e)

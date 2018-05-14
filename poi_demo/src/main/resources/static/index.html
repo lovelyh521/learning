@@ -16,10 +16,12 @@
             multiple>
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-        <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+        <div class="el-upload__tip" slot="tip">只能上传docx/rar文件</div>
     </el-upload>
 
     <template>
+        <el-input-number v-model="lower" @change="handlerLower"  label="下限"></el-input-number>
+        <el-input-number v-model="upper" @change="handlerUpper"  label="上限"></el-input-number>
         <el-table
                 :data="tableData"
                 style="width: 100%">
@@ -49,17 +51,37 @@
                 visible: false,
                 tableData: [{
                     word: '2016-05-02',
-                    label: '王小虎'
-                }]
+                    frequency: '王小虎'
+                }],
+                originData:[],
+                lower:5,
+                upper:20
             }
         },
         methods: {
             handleSuccess(response, file, fileList) {
-                console.log(response);
+                // console.log(response);
+                var result = []
                 for(var item in response){
-                    console.log(item)
-
+                    for(var arr in response[item]){
+                        console.log(arr)
+                        console.log(response[item][arr])
+                        var tableItem = {
+                            word:arr,
+                            frequency:response[item][arr]
+                        }
+                        result.push(tableItem);
+                    }
                 }
+                this.originData = result;
+                this.tableData = this.originData.filter(item => item.frequency>=this.lower && item.frequency<=this.upper);
+            },
+
+            handlerLower(value){
+                this.tableData = this.originData.filter(item => item.frequency>=value && item.frequency<=this.upper)
+            },
+            handlerUpper(value){
+                this.tableData = this.originData.filter(item => item.frequency>=this.lower && item.frequency<=value)
             }
         }
     });
