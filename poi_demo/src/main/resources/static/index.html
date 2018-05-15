@@ -6,9 +6,10 @@
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 </head>
 <body>
-<div id="app">
+<div id="app" style="margin: auto">
 
     <el-upload
+            style="width:500px;margin:auto"
             class="upload-demo"
             drag
             action="/calcWordFrequency"
@@ -16,9 +17,10 @@
             multiple>
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-        <div class="el-upload__tip" slot="tip">只能上传docx/rar文件</div>
+        <div class="el-upload__tip" slot="tip">只能上传docx/zip文件</div>
     </el-upload>
 
+    <div  style="width:500px;margin:25px auto;">
     <template>
         <el-input-number v-model="lower" @change="handlerLower"  label="下限"></el-input-number>
         <el-input-number v-model="upper" @change="handlerUpper"  label="上限"></el-input-number>
@@ -37,6 +39,7 @@
             </el-table-column>
         </el-table>
     </template>
+    </div>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -50,8 +53,8 @@
             return {
                 visible: false,
                 tableData: [{
-                    word: '2016-05-02',
-                    frequency: '王小虎'
+                    word: '',
+                    frequency: ''
                 }],
                 originData:[],
                 lower:5,

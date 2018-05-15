@@ -10,14 +10,15 @@ import java.util.stream.Collectors;
  */
 public class Dictionary
 {
-    private static HashMap<String, Integer> dictionary = new HashMap<>();
-    private static int wordsCount = 0;
+    private HashMap<String, Integer> dictionary ;
+    private int wordsCount = 0;
 
     /**
      * 字典这个类的构造函数
      */
     public Dictionary()    {
-
+        dictionary =  new HashMap<>();
+        wordsCount = 0;
     }
 
     /**
@@ -25,7 +26,7 @@ public class Dictionary
      *
      * @param word
      */
-    public static void insert(String word)
+    public void insert(String word)
     {
         if (dictionary.containsKey(word))
         {
@@ -41,15 +42,8 @@ public class Dictionary
     /**
      * 展示字典中存放的所有单词及其出现次数
      */
-    public static List getDictionary()
+    public List getDictionary()
     {
-        // for (Iterator<String> it = dictionary.keySet().iterator(); it.hasNext(); )
-        // {
-        //     String key = it.next();
-        //     System.out.print(key);
-        //     System.out.print(": ");
-        //     System.out.println(dictionary.get(key));
-        // }
         List<Map.Entry<String, Integer>> list = new ArrayList<>(dictionary.entrySet());
 
         //升序排序
@@ -61,24 +55,5 @@ public class Dictionary
         return list.stream().filter(item->item.getValue()>5).collect(Collectors.toList());
         // return list.stream().filter(item->item.getValue()>5 && item.getValue()<30).collect(Collectors.toList());
     }
-    // public static void main( String[] args ) throws Exception {
-    //     //这里放置你所说的段落
-    //     String passage = "public static void main( String[] args ) {";
-    //     Scanner scanner = new Scanner( passage );
-    //     Dictionary dict = new Dictionary();
-    //     while ( scanner.hasNextLine() ) {
-    //         String line =scanner.nextLine();
-    //         boolean isBlankLine = line.matches( "\\W" ) || line.length() == 0;
-    //         if ( isBlankLine ) {
-    //             continue;
-    //         }
-    //         String[] words = line.split( "\\W" );
-    //         for ( String word : words ) {
-    //             if ( word.length() != 0 ) {
-    //                 dict.insert( word );
-    //             }
-    //         }
-    //     }
-    //     dict.displayDictionary();
-    // }
+
 }

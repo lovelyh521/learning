@@ -12,9 +12,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * 类描述：提供接口
@@ -31,24 +34,29 @@ public class ControllerRest
     List calcWordFrequency(@RequestParam("file") MultipartFile file,
                              HttpServletRequest request)
     {
-        logger.info(file.getName());
         String fileName = file.getOriginalFilename();
         logger.info("filename=" + fileName);
         String filePath = request.getSession().getServletContext().getRealPath("imgupload/");
+        logger.info("filepath:=" + filePath);
         try
         {
-            logger.info("filepath:=" + filePath);
+            delAllFile(filePath);
             uploadFile(file.getBytes(), filePath, fileName);
         } catch (Exception e)
         {
             logger.error("exception " + e);
         }
 
+
         //解析文件 遍历文件夹下所有文件
         try
         {
+            if(fileName.endsWith("zip")){
+                unZipFile(filePath+"/"+fileName,filePath);
+            }
+
             List<File> fileList = getFileList(filePath);
-            // Dictionary dict = new Dictionary();
+            Dictionary dict = new Dictionary();
             for (File item : fileList)
             {
                 XWPFDocument docx = new XWPFDocument(
@@ -70,23 +78,46 @@ public class ControllerRest
                     {
                         if (word.length() != 0 && word.matches("[a-zA-Z]+"))
                         {
-                            Dictionary.insert(word.toLowerCase());
+                            dict.insert(word.toLowerCase());
                         }
                     }
                 }
             }
-            return Dictionary.getDictionary();
+
+            return dict.getDictionary();
 
 
         } catch (IOException e)
         {
-            e.printStackTrace();
+            logger.error(e);
+        }finally
+        {
+            // delAllFile(filePath);
         }
-
-        //删除文件
-
         //返回json
         return new ArrayList();
+    }
+
+    private void unZipFile(String fileZip,String destDir) throws IOException{
+
+        logger.info("destDir="+destDir);
+        logger.info("fileZip="+ fileZip);
+        byte[] buffer = new byte[1024];
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(fileZip), Charset.forName("GBK"));
+        ZipEntry zipEntry = zis.getNextEntry();
+        while(zipEntry != null){
+            String fileName = zipEntry.getName();
+            File newFile = new File(destDir +"/" + fileName);
+            FileOutputStream fos = new FileOutputStream(newFile);
+            int len;
+            while ((len = zis.read(buffer)) > 0) {
+                fos.write(buffer, 0, len);
+            }
+            fos.close();
+            zipEntry = zis.getNextEntry();
+        }
+        zis.closeEntry();
+        zis.close();
     }
 
     private void uploadFile(byte[] file, String filePath, String fileName) throws Exception
@@ -100,6 +131,30 @@ public class ControllerRest
         out.write(file);
         out.flush();
         out.close();
+    }
+
+    private void delAllFile(String path) {
+        File file = new File(path);
+        if (!file.exists()) {
+            return ;
+        }
+        if (!file.isDirectory()) {
+            return ;
+        }
+        String[] tempList = file.list();
+        File temp;
+        for (int i = 0; i < tempList.length; i++) {
+            if (path.endsWith(File.separator)) {
+                temp = new File(path + tempList[i]);
+            } else {
+                temp = new File(path + File.separator + tempList[i]);
+            }
+            if (temp.isFile()) {
+                temp.delete();
+            }
+        }
+        logger.info("delete path =" + path+" success");
+        return ;
     }
 
     private List<File> getFileList(String strPath)
