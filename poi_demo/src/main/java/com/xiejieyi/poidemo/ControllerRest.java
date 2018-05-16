@@ -2,6 +2,7 @@ package com.xiejieyi.poidemo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -35,13 +37,19 @@ public class ControllerRest
                              HttpServletRequest request)
     {
         String fileName = file.getOriginalFilename();
-        logger.info("filename=" + fileName);
+        if(fileName == null || fileName.isEmpty()){
+            return new ArrayList();
+        }
+        String fileExt = fileName.substring(fileName.lastIndexOf("."));
+        String newFileName = "myfile." + fileExt;
+        // file.get
+        logger.info("filename=" +  file.getName());
         String filePath = request.getSession().getServletContext().getRealPath("imgupload/");
         logger.info("filepath:=" + filePath);
         try
         {
             delAllFile(filePath);
-            uploadFile(file.getBytes(), filePath, fileName);
+            uploadFile(file.getBytes(), filePath, newFileName);
         } catch (Exception e)
         {
             logger.error("exception " + e);
@@ -51,19 +59,32 @@ public class ControllerRest
         //解析文件 遍历文件夹下所有文件
         try
         {
-            if(fileName.endsWith("zip")){
-                unZipFile(filePath+"/"+fileName,filePath);
+            if(newFileName.endsWith("zip")){
+                unZipFile(filePath+"/"+newFileName,filePath);
             }
 
             List<File> fileList = getFileList(filePath);
             Dictionary dict = new Dictionary();
             for (File item : fileList)
             {
-                XWPFDocument docx = new XWPFDocument(
-                        new FileInputStream(item));
-                //using XWPFWordExtractor Class
-                XWPFWordExtractor we = new XWPFWordExtractor(docx);
-                Scanner scanner = new Scanner(we.getText());
+                String filename=item.getName();
+                Scanner scanner = null;
+                if(filename.endsWith("docx")){
+                    XWPFDocument docx = new XWPFDocument(
+                            new FileInputStream(item));
+                    //using XWPFWordExtractor Class
+                    XWPFWordExtractor we = new XWPFWordExtractor(docx);
+                    scanner = new Scanner(we.getText());
+                }else{
+                    // 创建输入流读取DOC文件
+                    FileInputStream in = new FileInputStream(item);
+
+                    // 创建WordExtractor
+                    WordExtractor extractor = new WordExtractor(in);
+
+                    // 对DOC文件进行提取
+                    scanner = new Scanner(extractor.getText());
+                }
 
                 while (scanner.hasNextLine())
                 {
@@ -171,7 +192,7 @@ public class ControllerRest
                 { // 判断是文件还是文件夹
                     //文件夹忽略
                     continue;
-                } else if (fileName.endsWith("docx"))
+                } else if (fileName.endsWith("docx") || fileName.endsWith("doc"))
                 { // 判断文件名是否以.avi结尾
                     String strFileName = files[i].getAbsolutePath();
                     logger.info("---" + strFileName);
