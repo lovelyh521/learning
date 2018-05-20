@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -117,6 +117,29 @@ public class ControllerRest
         }
         //返回json
         return new ArrayList();
+    }
+
+    @RequestMapping(value = "/exportExcel", method = RequestMethod.GET)
+    public void exportExcel(HttpServletResponse response) throws Exception
+    {
+        ExcelData data = new ExcelData();
+        data.setName("hello");
+        List<String> titles = new ArrayList();
+        titles.add("a1");
+        titles.add("a2");
+        titles.add("a3");
+        data.setTitles(titles);
+
+        List<List<Object>> rows = new ArrayList();
+        List<Object> row = new ArrayList();
+        row.add("11111111111");
+        row.add("22222222222");
+        row.add("3333333333");
+        rows.add(row);
+
+        data.setRows(rows);
+
+        ExportExcelUtils.exportExcel(response,"hello.xlsx",data);
     }
 
     private void unZipFile(String fileZip,String destDir) throws IOException{
