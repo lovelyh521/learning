@@ -1,4 +1,4 @@
-package com.xiejieyi.poidemo;
+package com.xiejieyi.poidemo.common;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class Dictionary
 {
     private HashMap<String, Integer> dictionary ;
-    private int wordsCount = 0;
+    private int wordsCount;
 
     /**
      * 字典这个类的构造函数
@@ -48,9 +48,6 @@ public class Dictionary
 
         //升序排序
         Collections.sort(list, (o1, o2) -> o2.getValue().compareTo(o1.getValue()));
-
-        // for (Map.Entry<String, Integer> e: list) {
-        //     System.out.println(e.getKey()+":"+e.getValue());        // }
 
         return list.stream().filter(item->item.getValue()>5).collect(Collectors.toList());
         // return list.stream().filter(item->item.getValue()>5 && item.getValue()<30).collect(Collectors.toList());

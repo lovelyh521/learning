@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <!-- import CSS -->
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
 </head>
 <body>
 <div id="app" style="margin: auto">
@@ -14,31 +15,41 @@
             drag
             action="/calcWordFrequency"
             :on-success="handleSuccess"
+            :on-error="handlerError"
             multiple>
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
         <div class="el-upload__tip" slot="tip">只能上传docx/zip文件</div>
     </el-upload>
-
-    <div  style="width:500px;margin:25px auto;">
-    <template>
-        <el-input-number v-model="lower" @change="handlerLower"  label="下限"></el-input-number>
-        <el-input-number v-model="upper" @change="handlerUpper"  label="上限"></el-input-number>
-        <el-table
-                :data="tableData"
-                style="width: 100%">
-            <el-table-column
-                    prop="word"
-                    label="单词"
-                    width="180">
-            </el-table-column>
-            <el-table-column
-                    prop="frequency"
-                    label="出现频率"
-                    width="180">
-            </el-table-column>
-        </el-table>
-    </template>
+    <el-dialog
+            title="提示"
+            :visible.sync="dialogVisible"
+            width="30%">
+        <span>文档格式异常，请修改后重试</span>
+        <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+  </span>
+    </el-dialog>
+    <div style="width:500px;margin:25px auto;">
+        <template>
+            <el-input-number v-model="lower" @change="handlerLower" label="下限"></el-input-number>
+            <el-input-number v-model="upper" @change="handlerUpper" label="上限"></el-input-number>
+            <el-button type="primary" round @click.native="exportExcels">导出EXCEL</el-button>
+            <el-table
+                    :data="tableData"
+                    style="width: 100%">
+                <el-table-column
+                        prop="word"
+                        label="单词"
+                        width="180">
+                </el-table-column>
+                <el-table-column
+                        prop="frequency"
+                        label="出现频率"
+                        width="180">
+                </el-table-column>
+            </el-table>
+        </template>
     </div>
 </div>
 </body>
@@ -46,8 +57,9 @@
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
 <!-- import JavaScript -->
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
-    new Vue({
+      new Vue({
         el: '#app',
         data: function () {
             return {
@@ -56,35 +68,66 @@
                     word: '',
                     frequency: ''
                 }],
-                originData:[],
-                lower:5,
-                upper:20
+                originData: [],
+                lower: 5,
+                upper: 20,
+                dialogVisible: false
             }
         },
         methods: {
+            handlerError(err,file,fileList){
+                console.log(err);
+                this.dialogVisible = true;
+            },
             handleSuccess(response, file, fileList) {
                 // console.log(response);
+                let retCode = response.retcode;
+                if(retCode != 0){
+                    this.dialogVisible = true;
+                }
+
                 var result = []
-                for(var item in response){
-                    for(var arr in response[item]){
+                for (var item in response.data) {
+                    for (var arr in response.data[item]) {
                         console.log(arr)
-                        console.log(response[item][arr])
+                        console.log(response.data[item][arr])
                         var tableItem = {
-                            word:arr,
-                            frequency:response[item][arr]
+                            word: arr,
+                            frequency: response.data[item][arr]
                         }
                         result.push(tableItem);
                     }
                 }
                 this.originData = result;
-                this.tableData = this.originData.filter(item => item.frequency>=this.lower && item.frequency<=this.upper);
+                this.tableData = this.originData.filter(item => item.frequency >= this.lower && item.frequency <= this.upper);
             },
 
-            handlerLower(value){
-                this.tableData = this.originData.filter(item => item.frequency>=value && item.frequency<=this.upper)
+            handlerLower(value) {
+                this.tableData = this.originData.filter(item => item.frequency >= value && item.frequency <= this.upper)
             },
-            handlerUpper(value){
-                this.tableData = this.originData.filter(item => item.frequency>=this.lower && item.frequency<=value)
+            handlerUpper(value) {
+                this.tableData = this.originData.filter(item => item.frequency >= this.lower && item.frequency <= value)
+            },
+            exportExcels() {
+                this.tableData = this.originData.filter(item => item.frequency >= this.lower && item.frequency <=
+                    this.upper);
+                const loading = this.$loading({
+                    lock: true,
+                    text: 'Loading',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 0, 0, 0.7)'
+                });
+                axios.post('/exportExcel',this.tableData,{responseType: 'arraybuffer'})
+                    .then(function (response) {
+                        loading.close();
+                        let blob = new Blob([response.data],{type:"application/vnd.ms-excel"});
+                        let objectUrl =  URL.createObjectURL(blob);
+                        window.location.href=objectUrl;
+                    })
+                    .catch(function (error) {
+                        loading.close();
+                        console.log(error);
+                    });
             }
         }
     });
