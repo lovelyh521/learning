@@ -1,4 +1,4 @@
-package com.xiejieyi.poidemo;
+package com.xiejieyi.poidemo.common;
 
 import java.io.Serializable;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.xiejieyi.poidemo;
+package com.xiejieyi.poidemo.common;
 
 /**
  * 类描述：
@@ -8,6 +8,7 @@ package com.xiejieyi.poidemo;
 
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
+import com.xiejieyi.poidemo.bean.TranslateBean;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -28,36 +29,38 @@ import java.util.Map.Entry;
 
 public class YouDaoAPI
 {
+
     // public static void main(String[] args) throws Exception
-    public static Map translate(String query)
+    public static TranslateBean translate(String query)
     {
-        String appKey = "7a90639969136c02";
-        // String query = "Thanks";
         String salt = String.valueOf(System.currentTimeMillis());
         String from = "EN";
         String to = "zh-CHS";
-        String sign = md5(appKey + query + salt + "9vhBmQOY4wKYSreOb9gCbYUVX5KMv0Zs");
+        String sign = md5(Constant.appKey + query + salt + Constant.YOUDAO_API_SECRET);
         Map params = new HashMap();
         params.put("q", query);
         params.put("from", from);
         params.put("to", to);
         params.put("sign", sign);
         params.put("salt", salt);
-        params.put("appKey", appKey);
-        // params.put("ext",false);
-        // params.put("voice",false);
+        params.put("appKey", Constant.appKey);
 
         Map result = requestForHttp("http://openapi.youdao.com/api", params);
-    //    单词 音标 词性 释义 例句
-        Map newResult =  new HashMap<String,Object>();
-        newResult.put("word",result.get("query"));
+        //    单词 音标 词性 释义 例句
+        // TODO 查不到怎么办
+        TranslateBean translateBean = new TranslateBean();
+        translateBean.setWord((String) result.get("query"));
         Map basicResult = (Map)result.get("basic");
-        String phonetic= "us:["+basicResult.get("us-phonetic")+"]" + " uk:["+basicResult.get("uk-phonetic")+"]";
-        newResult.put("phonetic",phonetic);
-        newResult.put("explains",result.get("explains"));
-        return newResult;
-        // .get("us-phonetic")
-        // newResult.put("")
+        if(basicResult == null){
+            translateBean.setPhonetic("");
+            translateBean.setExplains(new ArrayList());
+        }
+        else{
+            String phonetic= "us:["+basicResult.get("us-phonetic")+"]" + " uk:["+basicResult.get("uk-phonetic")+"]";
+            translateBean.setPhonetic(phonetic);
+            translateBean.setExplains((List)basicResult.get("explains"));
+        }
+        return translateBean;
     }
 
     public static Map<String, Object> requestForHttp(String url, Map requestParams)
@@ -66,7 +69,6 @@ public class YouDaoAPI
         CloseableHttpClient httpClient = HttpClients.createDefault();
         /**HttpPost*/
         HttpPost httpPost = new HttpPost(url);
-        // System.out.println(new JSONObject(requestParams).toString());
         List params = new ArrayList();
         Iterator<Entry> it = requestParams.entrySet().iterator();
         while(it.hasNext())
@@ -93,10 +95,7 @@ public class YouDaoAPI
             EntityUtils.consume(httpEntity);
 
             Gson gson = new Gson();
-
             map = gson.fromJson(result, map.getClass());
-            System.out.println(map);
-
         }
         catch(Exception e){
             e.printStackTrace();

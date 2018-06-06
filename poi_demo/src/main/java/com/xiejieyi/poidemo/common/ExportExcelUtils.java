@@ -1,4 +1,4 @@
-package com.xiejieyi.poidemo;
+package com.xiejieyi.poidemo.common;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -55,7 +55,7 @@ public class ExportExcelUtils
 
         rowIndex = writeTitlesToExcel(wb, sheet, data.getTitles());
         writeRowsToExcel(wb, sheet, data.getRows(), rowIndex);
-        autoSizeColumns(sheet, data.getTitles().size() + 1);
+        // autoSizeColumns(sheet, data.getTitles().size() + 1);
 
     }
 
