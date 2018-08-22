@@ -1,0 +1,21 @@
+server:
+  port: 41000
+
+spring:
+  application:
+    name: demo
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://10.154.4.6:32000/eureka/
+
+endpoints:
+  health:
+    sensitive: false
+management:
+  security:
+    enabled: false
+
+
+

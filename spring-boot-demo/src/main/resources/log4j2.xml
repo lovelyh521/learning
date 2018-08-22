@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_HOME">/var/log/vrms</Property>
+        <Property name="LOGSTASH_SERVER">10.154.4.21</Property>
+        <Property name="LOGSTASH_SERVER_PORT">4561</Property>
+        <Property name="LOG_LAYOUT">%d{DEFAULT} %-5p %t %c %X{logType} ${service} %X{username} %X{action} %X{method}
+            %X{result} %X{httpCode} %X{srcIP} %m%n
+        </Property>
+        <Property name="service">${env:serviceName}</Property>
+        <!--操作日志-->
+        <Property name="JSON_LAYOUT">
+            {"timestamp": "%d{yyyy-MM-dd HH:mm:ss:SSSS}","logLevel":"%p","logType":"%X{logType}","username":"%X{username}","action":"%X{action}","message":"%m %ex{short.message}","method": "%M","srcIP":"%X{srcIP}", "thread_name":"%t","service":"${service}","result":"%X{result}","httpCode":"%X{httpCode}","method":"%X{method}"}%n
+        </Property>
+    </Properties>
+    <Appenders>
+        <Socket name="Logstash" host="${LOGSTASH_SERVER}" port="${LOGSTASH_SERVER_PORT}" protocol="TCP">
+            <PatternLayout pattern="${JSON_LAYOUT}"/>
+        </Socket>
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_LAYOUT}"/>
+        </Console>
+
+        <Console name="JSON" target="SYSTEM_OUT">
+            <PatternLayout pattern="${JSON_LAYOUT}"/>
+            <!--<JsonLayout objectMessageAsJsonObject="true" properties="true" /> &lt;!&ndash;使用json格式输出&ndash;&gt;-->
+        </Console>
+        <RollingFile name="FILE" fileName="${LOG_HOME}/info.log"
+                     filePattern="${LOG_HOME}/info-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_LAYOUT}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+        </RollingFile>
+        <RollingFile name="EXCEPTION" fileName="${LOG_HOME}/exception.log"
+                     filePattern="${LOG_HOME}/exception-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_LAYOUT}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="exception" level="error" additivity="false">
+            <AppenderRef ref="EXCEPTION"/>
+        </Logger>
+
+        <Logger name="operation" level="info" additivity="false">
+            <AppenderRef ref="Logstash"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="FILE"/>
+        </Root>
+    </Loggers>
+</Configuration>

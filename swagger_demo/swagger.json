@@ -5,7 +5,8 @@
     "version": "1.0.0",
     "title": "Interest Group API"
   },
-  "basePath": "/v1",
+  "host": "127.0.0.1:8762",
+  "basePath": "/",
   "tags": [{
     "name": "auth",
     "description": "登录认证接口"
@@ -128,8 +129,44 @@
                   "description": "返回码，0成功，其他失败."
                 },
                 "data": {
-                  "$ref": "#/definitions/User",
+                  "$ref": "#/definitions/add_user",
                   "description": "具体的结果."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user":{
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "添加用户信息",
+        // "description": "Returns a single pet",
+        "operationId": "addUser",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [{
+            "name": "user",
+            "in": "body",
+            "description": "添加用户",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/add_user"
+            } 
+        }],
+        "responses": {
+          "result": {
+            "description": "查询结果",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "retcode": {
+                  "type": "integer",
+                  "description": "返回码，0成功，其他失败."
                 }
               }
             }
@@ -141,35 +178,14 @@
   },
   
   "definitions": {    
-    "User": {
+    "add_user": {
       "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
+      "properties": {        
         "username": {
-          "type": "string"
-        },
-        "firstName": {
-          "type": "string"
-        },
-        "lastName": {
-          "type": "string"
-        },
-        "email": {
           "type": "string"
         },
         "password": {
           "type": "string"
-        },
-        "phone": {
-          "type": "string"
-        },
-        "userStatus": {
-          "type": "integer",
-          "format": "int32",
-          "description": "User Status"
         }
       }      
     },   

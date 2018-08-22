@@ -22,6 +22,7 @@ public class Device extends Base
 {
     private String deviceName;
 
+
     public Device()
     {
     }
